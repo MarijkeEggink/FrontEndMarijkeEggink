@@ -1,0 +1,66 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>assignment1</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<p id="sequence"></p>
+
+<script>
+    Sequence = {
+        DNA: "ATG",
+        createSequence : function (length){
+            let nucs = ["A", "C", "T", "G"];
+            let stop = ["TAA", "TAG", "TGA"];
+
+            for (let i = 0; i < length; i++){
+                this.DNA += nucs[Math.floor(Math.random()*4)]
+            }
+
+            this.DNA += stop[Math.floor(Math.random()*3)]
+        },
+        formatSequence : function (length){
+            let len = length;
+            let seq = "";
+            for (let i = 0; i < this.DNA.length; i++){
+                if (i === len){
+                    seq += "<br>"
+                    len += length;
+                }
+                seq += this.DNA.charAt(i);
+            }
+            return seq;
+        },
+        getOccurrences : function (nuc) {
+            return (this.DNA.split(nuc).length -1)
+        },
+        getPercentages : function (nuc) {
+            return (this.getOccurrences(nuc) / this.DNA.length * 100).toFixed(2);
+        },
+        getGcPercentage : function () {
+            let GC = this.getOccurrences("G") + this.getOccurrences("C");
+            return GC / this.DNA.length * 100;
+        },
+        getProteinLength : function () {
+            return this.DNA.length / 3;
+        }
+    };
+
+    let DNASeq = document.querySelector("#sequence");
+
+    Sequence.createSequence(180);
+
+    DNASeq.innerHTML = "<b>Sequence:</b> <br>" + Sequence.formatSequence(60) +
+        "<hr> <b>Occurrences:</b> &emsp;&emsp;  A: " + Sequence.getOccurrences("A") + "&emsp; T: " +
+        Sequence.getOccurrences("T") + "&emsp; G: " + Sequence.getOccurrences("G") + "&emsp; C: " +
+        Sequence.getOccurrences("C") + "<hr> <b>Precentages:</b> &emsp;&emsp; A: " + Sequence.getPercentages("A") +
+        "% &emsp; T: " + Sequence.getPercentages("T") + "% &emsp; G: " + Sequence.getPercentages("G") + "% &emsp; C: " +
+        Sequence.getPercentages("C") + "% <hr> <b>GC Percentage:</b> " + Sequence.getGcPercentage().toFixed(2) + "%" +
+        "<hr> <b>Protein sequence length:</b> " + Sequence.getProteinLength() + " amino acids";
+
+</script>
+</body>
+</html>
