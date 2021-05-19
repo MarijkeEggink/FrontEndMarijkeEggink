@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <title>assignment2</title>
@@ -14,13 +14,13 @@
 </form>
 <p id="sequence"></p>
 <hr>
-<form id="enzyme-form">
-  <label for="contains">Enzyme: </label><br>
-  <input type="text" id="contains" name="contains" value="Uba1175I" required><br>
-  <input type="submit" id="submit-enzyme" value="Submit" name="submit-enzyme" disabled>
+<form id="request-enzyme">
+  <label for="enzyme">Name your enzyme:</label><br>
+  <input id="enzyme" type="text" name="enzyme" value="JavaScript"><br>
+  <input type="submit" name="submit-enzyme">
 </form>
 <hr>
-<p id="enzyme"></p>
+<p id="enzyme-data"></p>
 
 <script>
   Sequence = {
@@ -54,7 +54,7 @@
   };
 
   function createSequence (length){
-    let sequence = "ATGGCC";
+    let sequence = "ATG";
     let seqLength = validate(length);
     let nucs = ["A", "C", "T", "G"];
     let stop = ["TAA", "TAG", "TGA"];
@@ -80,18 +80,10 @@
   let submitGenerate = elementsGenerate["submit-generate"];
   submitGenerate.addEventListener("click", generateSequence);
 
-  let formEnzyme = document.querySelector("#enzyme-form");
-  formEnzyme.addEventListener("submit", fetchEnzyme);
-
-  let submitEnzyme = document.querySelector("#submit-enzyme")
-  let target = document.querySelector("#enzyme");
-
   function generateSequence(e){
     e.preventDefault();
     let seqLength = elementsGenerate["seq-length"].value;
     let DNASeq = document.querySelector("#sequence");
-
-    submitEnzyme.disabled = false;
 
     DNASeq.innerHTML = "<hr> <b>Sequence:</b> <br>" + Sequence.formatSequence(seqLength) +
             "<hr> <b>Occurrences:</b> &emsp;&emsp;  A: " + Sequence.getOccurrences("A") + "&emsp; T: " +
@@ -102,22 +94,19 @@
             "<hr> <b>Protein sequence length:</b> " + Sequence.getProteinLength() + " amino acids";
   }
 
+  let formEnzyme = document.querySelector("#request-enzyme");
+  let elementsEnzyme = formEnzyme.elements;
+
+  let submitEnzyme = elementsEnzyme["submit-enzyme"];
+  submitEnzyme.addEventListener("click", fetchEnzyme);
+  let enzymeInfo = document.querySelector("#enzyme-data");
+
   function fetchEnzyme(e){
     e.preventDefault();
 
-    let URL = "https://bioinf.nl/enzyme/api/v1/enzyme/";
-    let paramString = document.querySelector("#contains").value;
-
-    fetch(URL + paramString)
-            .then(response => response.json())
-            .then(data => showEnzyme(data))
-            .catch(error => {console.log("Error!" + error);
-            });
   }
 
-  function showEnzyme(data){
-    target.innerHTML = data.site;
-  }
+
 
 </script>
 </body>
