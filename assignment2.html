@@ -54,7 +54,7 @@
   };
 
   function createSequence (length){
-    let sequence = "ATGGCC";
+    let sequence = "ATG";
     let seqLength = validate(length);
     let nucs = ["A", "C", "T", "G"];
     let stop = ["TAA", "TAG", "TGA"];
@@ -115,8 +115,15 @@
             });
   }
 
+  function findEnzyme(site){
+    let regExp = new RegExp(site, 'gi');
+    let indexes = [...Sequence.DNA.matchAll(regExp)].map(hit => hit.index);
+    console.log(indexes)
+    return indexes;
+  }
+
   function showEnzyme(data){
-    target.innerHTML = data.site;
+    target.innerHTML = "<p>This Enzyme occures on the indexes: </p>" + findEnzyme(data.site);
   }
 
 </script>
