@@ -1,130 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <title>assignment2</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <title>Week3</title>
 </head>
 <body>
 
-<form id="generate-form">
-  <label for="seq-length">Sequence length:</label><br>
-  <input id="seq-length" type="number" name="seq-length"><br>
-  <input type="submit" name="submit-generate" value="Generate">
+<form id="generate-sequence">
+    <label for="sequence-length">Sequence length:</label><br>
+    <input type="number" id="sequence-length" name="sequence-length" value="180"><br>
+    <input type="submit" value="Generate" id="generate">
 </form>
+
 <p id="sequence"></p>
-<hr>
+<p id="statistics"></p>
+
 <form id="enzyme-form">
-  <label for="contains">Enzyme: </label><br>
-  <input type="text" id="contains" name="contains" value="Uba1175I" required><br>
-  <input type="submit" id="submit-enzyme" value="Submit" name="submit-enzyme" disabled>
+    <label for="enzyme-name">Enzyme:</label>
+    <select name="enzyme-name" id="enzyme-name">
+        <option name="AprI">AprI</option>
+        <option name="BamHI">BamHI</option>
+        <option name="EcoRI">EcoRI</option>
+        <option name="EcoRII">EcoRII</option>
+        <option name="HindIII">HindIII</option>
+        <option name="PstI">PstI</option>
+        <option name="SacI">SacI</option>
+        <option name="TaqI">TaqI</option>
+        <option name="XbaI">XbaI</option>
+    </select>
+    <input type="submit" value="Submit" id="submit" disabled>
 </form>
-<hr>
+
 <p id="enzyme"></p>
+<p id="errormessage"></p>
 
 <script>
   Sequence = {
     DNA: "",
-    formatSequence : function (seqLength){
-      this.DNA = createSequence(seqLength);
-      let length = 60;
-      let seq = "";
-      for (let i = 0; i < this.DNA.length; i++){
-        if (i === length){
-          seq += "<br>"
-          length += 60;
-        }
-        seq += this.DNA.charAt(i);
-      }
-      return seq;
+    getLength: function (){
+      return this.DNA.length;
     },
-    getOccurrences : function (nuc) {
-      return (this.DNA.split(nuc).length -1)
+    getOccurrence: function (nuc){
+      return this.DNA.split(nuc).length -1;
     },
-    getPercentages : function (nuc) {
-      return (this.getOccurrences(nuc) / this.DNA.length * 100).toFixed(2);
+    getPercentage: function (nuc) {
+      return (this.getOccurrence(nuc) / this.getLength() * 100).toFixed(2);
     },
-    getGcPercentage : function () {
-      let GC = this.getOccurrences("G") + this.getOccurrences("C");
-      return GC / this.DNA.length * 100;
-    },
-    getProteinLength : function () {
-      return this.DNA.length / 3;
+    getGcPercentage: function () {
+      let GC = this.getOccurrence("G") + this.getOccurrence("C");
+      return (GC / this.getLength() * 100).toFixed(2);
     }
-  };
-
-  function createSequence (length){
-    let sequence = "ATG";
-    let seqLength = validate(length);
-    let nucs = ["A", "C", "T", "G"];
-    let stop = ["TAA", "TAG", "TGA"];
-
-    for (let i = 0; i < seqLength-6; i++){
-      sequence += nucs[Math.floor(Math.random()*4)]
-    }
-    sequence += stop[Math.floor(Math.random()*3)]
-    return sequence;
   }
 
-  function validate(n) {
-    if (n < 3){
+  // function that generates a random sequence
+  function createSequence(length) {
+    length = validateLength(length-6);
+    let seq = "ATG";
+    let nucleotides = ["A", "T", "C", "G"];
+    let stopCodons = ["TAA", "TAG", "TGA"]
+
+    // get random nucleotide
+    for (let i = 0; i < length; i++) {
+      let index = Math.floor(Math.random()*4);
+      seq += nucleotides[index];
+    }
+
+    // get random stop codon
+    let index = Math.floor(Math.random()*3);
+    seq += stopCodons[index];
+
+    return seq;
+  }
+
+  // checks if length is divisible by 3
+  function validateLength(length){
+    if (length < 3) {
       return 3;
     } else {
-      return n - n % 3;
+      return length - length % 3;
     }
   }
 
-  let formGenerate = document.querySelector("#generate-form");
-  let elementsGenerate = formGenerate.elements;
-
-  let submitGenerate = elementsGenerate["submit-generate"];
-  submitGenerate.addEventListener("click", generateSequence);
-
-  let formEnzyme = document.querySelector("#enzyme-form");
-  formEnzyme.addEventListener("submit", fetchEnzyme);
-
-  let submitEnzyme = document.querySelector("#submit-enzyme")
-  let target = document.querySelector("#enzyme");
-
-  function generateSequence(e){
-    e.preventDefault();
-    let seqLength = elementsGenerate["seq-length"].value;
-    let DNASeq = document.querySelector("#sequence");
-
-    submitEnzyme.disabled = false;
-
-    DNASeq.innerHTML = "<hr> <b>Sequence:</b> <br>" + Sequence.formatSequence(seqLength) +
-            "<hr> <b>Occurrences:</b> &emsp;&emsp;  A: " + Sequence.getOccurrences("A") + "&emsp; T: " +
-            Sequence.getOccurrences("T") + "&emsp; G: " + Sequence.getOccurrences("G") + "&emsp; C: " +
-            Sequence.getOccurrences("C") + "<hr> <b>Precentages:</b> &emsp;&emsp; A: " + Sequence.getPercentages("A") +
-            "% &emsp; T: " + Sequence.getPercentages("T") + "% &emsp; G: " + Sequence.getPercentages("G") + "% &emsp; C: " +
-            Sequence.getPercentages("C") + "% <hr> <b>GC Percentage:</b> " + Sequence.getGcPercentage().toFixed(2) + "%" +
-            "<hr> <b>Protein sequence length:</b> " + Sequence.getProteinLength() + " amino acids";
+  // formats the sequence with a maximum width
+  function formattedSequence(sequence) {
+    let length = 60;
+    let seq = "";
+    for (let i = 0; i < sequence.length; i++){
+      if (i === length){
+        seq += "<br>";
+        length += 60;
+      }
+      seq += sequence.charAt(i);
+    }
+    return seq;
   }
 
-  function fetchEnzyme(e){
-    e.preventDefault();
+  function getEnzymes(e){
+      e.preventDefault();
+      let enzymeName = document.querySelector("#enzyme-name").value;
+      enzymeDisplay.innerHTML = "";
 
-    let URL = "https://bioinf.nl/enzyme/api/v1/enzyme/";
-    let paramString = document.querySelector("#contains").value;
-
-    fetch(URL + paramString)
-            .then(response => response.json())
-            .then(data => showEnzyme(data))
-            .catch(error => {console.log("Error!" + error);
-            });
+      fetchEnzyme(enzymeName)
+          .then(enzyme => displayEnzyme(enzyme))
+          .catch(error => {
+          console.log("Error! " + error);
+      })
   }
 
-  function findEnzyme(site){
-    let regExp = new RegExp(site, 'gi');
-    let indexes = [...Sequence.DNA.matchAll(regExp)].map(hit => hit.index);
-    console.log(indexes)
-    return indexes;
+  async function fetchEnzyme(enzymeName){
+      errorDisplay.innerHTML = "";
+      let URL = "http://bioinf.mocklab.io/api/v2/enzymes/";
+      let response = await fetch(URL + enzymeName);
+      console.log(response.status);
+      if (response.status === 200){
+          return await response.json();
+      } else if (response.status === 418) {
+          errorDisplay.innerHTML = "Error! I'm a tea pot.";
+          return null;
+      } else if (response.status === 503) {
+          errorDisplay.innerHTML = "Error! This service is unavailable at this moment.<br>The server is down for" +
+              "maintenance or is overloaded.<br>Please try again later!";
+      } else if (response.status === 429) {
+          errorDisplay.innerHTML = "Error! There are too many requests.<br>Please try again later!";
+      } else {
+          throw Error(response.statusText);
+      }
   }
 
-  function showEnzyme(data){
-    target.innerHTML = "<p>This Enzyme occures on the indexes: </p>" + findEnzyme(data.site);
+  // this function fetches the api
+  function oldFetchEnzyme(e) {
+      e.preventDefault();
+      let URL = "http://bioinf.mocklab.io/api/v2/enzymes/";
+      let enzymeName = document.querySelector("#enzyme-name").value;
+
+      fetch(URL + enzymeName)
+          .then(response => response.json())
+          .then(enzyme => displayEnzyme(enzyme))
+          .catch(error => {
+          console.log("Error! " + error);
+      })
   }
+
+  function findSite(site) {
+      site = site.toUpperCase()
+          .replace("^", "")
+          .replace(/B/g, "[CGT]")
+          .replace(/D/g, "[AGT]")
+          .replace(/H/g, "[ACT]")
+          .replace(/K/g, "[GT]")
+          .replace(/M/g, "[AC]")
+          .replace(/N/g, "[ACGT]")
+          .replace(/R/g, "[AG]")
+          .replace(/S/g, "[CG]")
+          .replace(/V/g, "[ACG]")
+          .replace(/W/g, "AT")
+          .replace(/Y/g, "[CT]")
+
+      // For debugging purposes, show the resulting regex
+      console.log(`Searching for site: '${site}'`);
+
+      // Find and return all indices
+      return [...Sequence.DNA.matchAll(new RegExp(site, 'g'))]
+          .map(hit => hit.index);
+  }
+
+  // function findSite(site){
+  //     let regExp = new RegExp(site, 'gi');
+  //     return [...Sequence.DNA.matchAll(regExp)].map(hit => hit.index);
+  // }
+
+  function addCuttingSite(indexes){
+      let sequence = Sequence.DNA
+      for (let i in indexes) {
+          let cutSite = parseInt(indexes[i]) + parseInt(i);
+          sequence = sequence.slice(0, cutSite) + "^" + sequence.slice(cutSite);
+      }
+      return sequence;
+  }
+
+  // displays the sequence and it's statistics
+  function displaySequence(e) {
+      e.preventDefault();
+      let sequenceLength = document.querySelector("#sequence-length").value;
+      Sequence.DNA = createSequence(sequenceLength);
+
+      submitButton.disabled = false;
+
+      sequenceDisplay.innerHTML = "<h2>Sequence</h2>" + formattedSequence(Sequence.DNA);
+      statisticsDisplay.innerHTML = `<h2>Statistics</h2> Sequence Length = ${Sequence.getLength()} <br> A &nbsp# = `+
+          ` ${Sequence.getOccurrence("A")}, % = ${Sequence.getPercentage("A")}% <br> C &nbsp# = ` +
+          ` ${Sequence.getOccurrence("C")}, % = ${Sequence.getPercentage("C")}% <br> T &nbsp# = ` +
+          ` ${Sequence.getOccurrence("T")}, % = ${Sequence.getPercentage("T")}% <br> G &nbsp# = ` +
+          ` ${Sequence.getOccurrence("G")}, % = ${Sequence.getPercentage("G")}% <br> GC% = ${Sequence.getGcPercentage()}%`;
+  }
+
+  // displays the enzyme
+  function displayEnzyme(enzyme){
+      let sites = enzyme.site;
+
+      enzymeDisplay.innerHTML = `Enzyme name: ${enzyme.name} <br>Cutting site(s): ${sites} <br>`;
+
+      let allIndexes = [];
+      for (let i in sites){
+          let indexes = findSite(sites[i]);
+          for (let i in indexes){
+              allIndexes.push(indexes[i]);
+          }
+      }
+
+      let sequence = addCuttingSite(allIndexes);
+      console.log(allIndexes)
+
+      if (Object.keys(allIndexes).length === 0){
+          enzymeDisplay.innerHTML += `There were no matches`
+      } else {
+          enzymeDisplay.innerHTML += `Number of cutting sites: ${allIndexes.length} <br> The cutting sites starts at: ` +
+              `${allIndexes} <br>'^' marks a cuttingsite: <br>${formattedSequence(sequence)}`;
+      }
+  }
+
+  // Select the required elements
+  let sequenceDisplay = document.querySelector("#sequence");
+  let statisticsDisplay = document.querySelector("#statistics");
+  let enzymeDisplay = document.querySelector("#enzyme");
+  let errorDisplay = document.querySelector("#errormessage");
+  let generateButton = document.querySelector("#generate");
+  let submitButton = document.querySelector("#submit");
+
+  // when clicked something is displayed
+  generateButton.addEventListener('click', displaySequence);
+  submitButton.addEventListener('click', getEnzymes);
 
 </script>
 </body>
